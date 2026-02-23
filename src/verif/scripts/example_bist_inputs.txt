@@ -1,0 +1,8 @@
+// Driver seed
+0x12341234ABCDABCD
+
+// Monitor seed
+0xABCDABCD12341234
+
+// LFSR stop code (20000 cycles)
+0x313A578568A6FE22

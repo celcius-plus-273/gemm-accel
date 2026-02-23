@@ -1,0 +1,4 @@
+./rtl/systolic/sa_mac.sv
+./rtl/systolic/sa_pe.sv
+./rtl/systolic/sa_compute.sv
+./testbench/tb_comp_array_only.sv

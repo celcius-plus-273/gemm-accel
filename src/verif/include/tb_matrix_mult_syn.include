@@ -1,0 +1,14 @@
+// post APR netlist
+./results/matrix_mult_wrapper_14.syn.v 
+
+// stdcells
+/tools/pdk/tsmc/musesemi/65MSRFGP/tcbn65gplus_200a/TSMCHOME/digital/Front_End/verilog/tcbn65gplus_200a/tcbn65gplus.v
+
+// pkg for testbench
+./rtl/matmul/matrix_mult_pkg.sv
+
+// memory emulator
+./rtl/memory/mem_emulator.sv
+
+// testbench
+./testbench/tb_matrix_mult_sapr.sv

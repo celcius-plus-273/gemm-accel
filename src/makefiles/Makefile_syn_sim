@@ -1,0 +1,117 @@
+TESTBENCH=tb_matrix_mult_syn
+TESTNAME=memory
+NUM_TESTS=1
+
+SRC_VERILOG=../../src/rtl
+SRC_VERIF=../../src/verif
+RTL_FOLDER=$(SRC_VERILOG)
+TB_FOLDER=$(SRC_VERIF)/testbench
+
+SYN_FOLDER=../../syn/results
+SYNOPSYS=/tools/software/synopsys
+
+DEBUG=1
+VCS=1
+FSDB=0
+SDF=0
+APR=0
+
+# Test vars
+M=4
+K=4
+N=4
+LOW=-16
+HIGH=16
+VERBOSE=1
+
+PYTHON=python3.8
+
+#Build up a list of verilog define statements to be used by vcs
+VERILOG_DEFINES:= 
+ifeq ($(DEBUG), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+DEBUG=1
+endif
+ifeq ($(VCS), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+VCS=1
+endif
+ifeq ($(SDF), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+SDF=1
+endif
+ifeq ($(APR), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+APR=1
+endif
+
+.DEFAULT_GOAL := vcs
+
+# Move all the verilog files from the source directory over to this simulation directory
+link:
+	ln -s $(RTL_FOLDER) .
+	ln -s $(TB_FOLDER) .
+	ln -s $(SRC_VERIF)/scripts .
+	ln -s $(SRC_VERIF)/include/$(TESTBENCH).include .
+	ln -s $(SYN_FOLDER) .
+
+mem:
+	rm -rf bin
+	mkdir bin
+	$(PYTHON) scripts/data_gen.py -d $(M) $(K) $(N) -b $(LOW) $(HIGH) -n $(NUM_TESTS)
+
+verif:
+	$(PYTHON) scripts/verify.py -d $(M) $(K) $(N) -n $(NUM_TESTS) -v
+
+# A new option has been added here. Take a closer look at -cm. Look it up!
+vcs:$(TESTBENCH).include
+	vcs -f $(TESTBENCH).include +v2k -R -sverilog -full64 +neg_tchk \
+		-timescale=1ns/10ps -debug_access+all -debug_region+cell+encrypt \
+		-debug_access -l $(TESTBENCH).log +define+$(VERILOG_DEFINES) \
+		+testname=$(TESTNAME) +numtests=$(NUM_TESTS) +actrows=$(M) \
+		-lca -kdb \
+
+#+incdir+$(SYNOPSYS)/syn/latest/dw/sim_ver \
+#+lint=all
+
+run: mem vcs verif
+
+wipe: clean
+	-@ rm -rf *.include \
+				alib-52 \
+				simv.daidir \
+				DVEfiles \
+				*.log \
+				*.vpd \
+				ucli.key \
+				default.svf \
+				simv \
+				*.sv *.v *.svh \
+				csrc \
+				novas* \
+				verdi_config_file \
+				verdiLog \
+				*.fsdb \
+				*.vcd \
+				rtl \
+				scripts \
+				testbench \
+				results \
+				bin
+	
+
+clean:
+	rm -rf DVEfiles
+	rm -rf *.log
+	rm -rf *.vpd
+	rm -rf ucli.key
+	rm -rf alib-52
+	rm -rf $(TESTBENCH)
+	rm -rf simv.daidir
+	rm -rf csrc
+	rm -rf simv
+	rm -rf novas*
+	rm -rf verdi_config_file
+	rm -rf verdiLog
+	rm -rf *.fsdb
+	rm -rf *.vdb
+	rm -rf vdCovLog
+	rm -rf .fsm.sch.verilog.xml
+	rm -rf vdCov.conf
+	rm -rf dut_log/*

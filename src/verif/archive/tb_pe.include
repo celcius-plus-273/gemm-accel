@@ -1,0 +1,6 @@
+./rtl/systolic/sa_mac.sv
+./rtl/systolic/sa_pe.sv
+
+./rtl/systolic/sa_include.sv
+
+./testbench/tb_pe.sv

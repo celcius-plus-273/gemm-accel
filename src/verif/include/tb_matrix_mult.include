@@ -1,0 +1,35 @@
+// packages
+./rtl/matmul/matrix_mult_pkg.sv
+
+// systolic array
+/tools/software/synopsys/syn/latest/dw/sim_ver/DW02_mac.v
+/tools/software/synopsys/syn/latest/dw/sim_ver/DW_fp_dp2.v
+/tools/software/synopsys/syn/latest/dw/sim_ver/DW_fp_mac.v
+./rtl/systolic/sa_mac_dw.sv
+./rtl/systolic/sa_mac_dw_fp.sv
+./rtl/systolic/sa_pe.sv
+./rtl/systolic/sa_compute.sv
+./rtl/systolic/sa_include.sv
+./rtl/systolic/sa_control.sv
+
+// matmul
+./rtl/matmul/matrix_mult.sv
+./rtl/matmul/matrix_mult_wrapper.sv
+
+// memory
+./rtl/memory/mem_emulator.sv
+/tools/software/synopsys/syn/latest/dw/sim_ver/DW_ram_rw_s_dff.v
+
+// bist
+./rtl/bist/pseudo_rand_num_gen_pkg.sv
+./rtl/bist/lfsr.sv
+./rtl/bist/misr.sv
+./rtl/bist/pseudo_rand_num_gen.sv
+./rtl/bist/signature_analizer.sv
+
+// misc
+./rtl/misc/async_nreset_synchronizer.sv
+./rtl/misc/shift_reg.sv
+
+// testbench
+./testbench/tb_matrix_mult_sapr.sv

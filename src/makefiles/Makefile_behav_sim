@@ -1,0 +1,136 @@
+# TESTBENCH
+TESTBENCH=tb_matrix_mult_mem
+# TESTNAME=memory # Not used
+
+# Paths & Directories
+SRC_VERILOG=../../src/rtl
+SRC_VERIF=../../src/verif
+RTL_FOLDER=$(SRC_VERILOG)
+TB_FOLDER=$(SRC_VERIF)/testbench
+SYNOPSYS=/tools/software/synopsys
+
+# Simulation Parameters
+NUM_TESTS=100
+DEBUG=0
+VCD=1
+FSDB=0
+VERBOSE=0
+
+# Data Parameters
+FP=0
+WIDTH=16
+M=8
+K=8
+N=8
+LOW=-32
+HIGH=32
+
+# Systolic-array Parameters
+ROW=$(K)
+COL=$(N)
+
+# Tools
+PYTHON=python
+
+# Verbose flag
+VERBOSITY:=
+
+# Tool Defines
+VERILOG_DEFINES:= 
+ifeq ($(DEBUG), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+DEBUG=1
+endif
+ifeq ($(VCD), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+VCD=1
+endif
+ifeq ($(FSDB), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+FSDB=1
+endif
+ifeq ($(FP), 1)
+		VERILOG_DEFINES := $(VERILOG_DEFINES)+FP=1
+endif
+ifeq ($(VERBOSE), 1)
+		VERBOSITY := -v
+endif
+
+VERILOG_DEFINES := $(VERILOG_DEFINES)+WIDTH=$(WIDTH)
+VERILOG_DEFINES := $(VERILOG_DEFINES)+ROW=$(ROW)
+VERILOG_DEFINES := $(VERILOG_DEFINES)+COL=$(COL)
+
+.DEFAULT_GOAL := vcs
+
+# Link source directories
+link:
+	ln -s -f $(RTL_FOLDER) .
+	ln -s -f $(TB_FOLDER) .
+	ln -s -f $(SRC_VERIF)/scripts .
+	ln -s -f $(SRC_VERIF)/include/$(TESTBENCH).include .
+
+# Generate input matrices
+mem:
+	rm -rf bin
+	mkdir bin
+	$(PYTHON) scripts/data_gen.py -d $(M) $(K) $(N) -b $(LOW) $(HIGH) -w $(WIDTH) -f $(FP) -n $(NUM_TESTS) $(VERBOSITY)
+
+# Verify DUT results
+verif:
+	$(PYTHON) scripts/verify.py -d $(M) $(K) $(N) -a $(ROW) $(COL) -w $(WIDTH) -f $(FP) -n $(NUM_TESTS) $(VERBOSITY)
+	head -n 4 verif_summary.log
+
+# Call VCS
+vcs: $(TESTBENCH).include
+	vcs -f $(TESTBENCH).include +v2k -R -sverilog -full64 \
+		-timescale=1ns/10ps -debug_access+all -debug_region+cell+encrypt \
+		-debug_access -l $(TESTBENCH).log +define+$(VERILOG_DEFINES) \
+		+testname=$(TESTNAME) +numtests=$(NUM_TESTS) \
+		+actrows=$(M) +wrows=$(K) +wcols=$(N) \
+		+incdir+$(SYNOPSYS)/syn/latest/dw/sim_ver \
+		-lca -kdb \
+		+lint=all
+
+run: 
+	$(MAKE) mem 
+	$(MAKE) vcs 
+	$(MAKE) verif
+
+wipe: clean
+	rm -rf *.include
+	rm -rf alib-52
+	rm -rf simv.daidir
+	rm -rf DVEfiles
+	rm -rf *.log
+	rm -rf *.vpd
+	rm -rf ucli.key
+	rm -rf default.svf
+	rm -rf simv
+	rm -rf *.sv *.v *.svh
+	rm -rf csrc
+	rm -rf novas*
+	rm -rf verdi_config_file
+	rm -rf verdiLog
+	rm -rf *.fsdb
+	rm -rf rtl
+	rm -rf scripts
+	rm -rf testbench
+	rm -rf bin
+
+clean:
+	rm -rf DVEfiles
+	rm -rf *.log
+	rm -rf *.vpd
+	rm -rf ucli.key
+	rm -rf alib-52
+	rm -rf $(TESTBENCH)
+	rm -rf simv.daidir
+	rm -rf csrc
+	rm -rf simv
+	rm -rf novas*
+	rm -rf verdi_config_file
+	rm -rf verdiLog
+	rm -rf *.fsdb
+	rm -rf *.vcd
+	rm -rf *.vdb
+	rm -rf vdCovLog
+	rm -rf .fsm.sch.verilog.xml
+	rm -rf vdCov.conf
+	rm -rf dut_log/*
