@@ -2,6 +2,8 @@
 
 A hardware accelerator for dense matrix multiplication implemented in SystemVerilog. This project implements a systolic array architecture optimized for high-performance, energy-efficient matrix operations commonly used in AI/ML workloads.
 
+**Note:** This project's design & implementation were used as the safety module for the Hive SoC Tapeout (ECE4804: Theory to Tapeout). None of the physical design implementation details are shared in this repository.
+
 ## Overview
 
 A systolic array is a specialized parallel computing architecture where multiple processing elements (PEs) work in concert, with each PE communicating only with its neighbors. This design achieves excellent performance and energy efficiency by minimizing data movement and maximizing compute density. This implementation supports configurable array dimensions, multiple data formats, and comprehensive built-in self-test capabilities.
