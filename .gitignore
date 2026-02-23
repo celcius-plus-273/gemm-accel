@@ -1,0 +1,17 @@
+# all simulation outputs
+sim/*/*
+!sim/*/Makefile
+
+*_verified/*
+group14/*
+tasks.py
+
+scripts/*
+src/verif/scripts/__pycache__
+
+syn/*/*
+!syn/Makefile
+!syn/*/Makefile
+!syn/*/reports
+apr/*
+!apr/Makefile
