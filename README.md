@@ -1,4 +1,4 @@
-# GEMM Accelerator: Systolic Array
+# GEMM Accelerator: Weight Stationary Systolic Array
 
 A hardware accelerator for dense matrix multiplication implemented in SystemVerilog. This project implements a systolic array architecture optimized for high-performance, energy-efficient matrix operations commonly used in AI/ML workloads.
 
