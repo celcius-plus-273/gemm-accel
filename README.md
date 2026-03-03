@@ -15,6 +15,8 @@ A systolic array is a specialized parallel computing architecture where multiple
 - **Scalable Architecture**: Configurable systolic array dimensions (up to 16×16 PEs)
 
 - **Multiple Data Formats**: 8-bit, 16-bit, 32-bit integers and floating-point (float16, float32, float8_e4m3)
+- **Comprehensive Verification**: Automated test generation and reference model verification
+- **EDA Tool Integration**: Synopsys VCS, Design Compiler, and ICC2
 
 - **Comprehensive Verification**: Automated test generation and reference model verification (golden model)
 
