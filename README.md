@@ -2,19 +2,22 @@
 
 A hardware accelerator for dense matrix multiplication implemented in SystemVerilog. This project implements a systolic array architecture optimized for high-performance, energy-efficient matrix operations commonly used in AI/ML workloads.
 
+You can find a list of projects that make use of the accelerator towards the end of the repository.
+
 **Note:** This project's design & implementation were used as the safety module for the Hive SoC Tapeout (ECE4804: Theory to Tapeout). None of the physical design implementation details are shared in this repository.
 
 ## Overview
 
-A systolic array is a specialized parallel computing architecture where multiple processing elements (PEs) work in concert, with each PE communicating only with its neighbors. This design achieves excellent performance and energy efficiency by minimizing data movement and maximizing compute density. This implementation supports configurable array dimensions, multiple data formats, and comprehensive built-in self-test capabilities.
+A systolic array is a specialized parallel computing architecture where multiple processing elements (PEs) work in concert, with each PE communicating only with its neighbors. This design achieves high inference throughput and energy efficiency by minimizing data movement and maximizing compute density. This implementation supports configurable array dimensions, and multiple data formats.
 
 ### Key Capabilities
 
 - **Scalable Architecture**: Configurable systolic array dimensions (up to 16×16 PEs)
+
 - **Multiple Data Formats**: 8-bit, 16-bit, 32-bit integers and floating-point (float16, float32, float8_e4m3)
-- **Operational Modes**: Weight preload, streaming computation, and BIST self-test
-- **Built-In Test (BIST)**: Pseudo-random test generation and signature analysis for manufacturing and field testing
-- **Comprehensive Verification**: Automated test generation and reference model verification
+
+- **Comprehensive Verification**: Automated test generation and reference model verification (golden model)
+
 - **EDA Tool Integration**: Synopsys VCS, Design Compiler, and ICC support
 
 ## Architecture
@@ -23,13 +26,17 @@ A systolic array is a specialized parallel computing architecture where multiple
 
 The systolic array performs matrix multiplication through a pipeline of activities:
 
-1. **Preload Phase**: Weight matrix is loaded into PE memory
-2. **Streaming Phase**: Input activations flow through the array while partial results accumulate
-3. **Drain Phase**: Final results are collected
+1. **Preload Phase**: Weight matrix is loaded from the buffer into PE's weight registers
+
+2. **Streaming Phase**: Input activations flow from the buffer through the array while partial results accumulate. Activations require a staggered format
+
+3. **Drain Phase**: Final results are collected and written to the output buffer
 
 ### Core Components
 
-- TODO: add block diagram
+<p align="center">
+<img src="./docs/top_level.png" alt="" width="700"/>
+</p>
 
 ### Module Hierarchy
 
@@ -130,7 +137,7 @@ Default configuration can be modified through Makefile parameters:
 | `PE_ROWS` | 8 | Systolic array row count |
 | `PE_COLS` | 8 | Systolic array column count |
 | `TEST_COUNT` | 100 | Number of test vectors |
-| `DATA_FORMAT` | INT | Data format (INT, FLOAT, FLOAT8) |
+| `DATA_FORMAT` | INT | Data format (INT, FLOAT) |
 
 ### Example: Custom Configuration
 
@@ -156,7 +163,11 @@ Supported formats: `int8`, `int16`, `int32`, `float16`, `float32`, `float8_e4m3`
 
 ### Running Simulations
 
-For this Public Version, only behavioral simulations are supported. Post-syn and post-apr simulations are not supported. Corresponding makefiles can be found under `src/makefiles`
+For this Public Version, only behavioral simulations are supported. Post-syn and post-apr simulations are not supported. Makefiles for running sims can be found under `src/makefiles`
+
+```bash
+make vcs        # calls VCS and executes simv
+```
 
 ### Verification
 
@@ -193,14 +204,24 @@ head -n 4 verif_summary.log
 - **16-bit Float**: efficient ML workloads
 - **32-bit Float**: high-precision applications/workloads
 
+Note that the data generation script `data_gen.py` performs the necessary transformations to the input matrices so that they can be loaded to the memory accordingly. The following diagram shows the expected formatting on the memory:
+
+<p align="center">
+<img src="./docs/memory_mapping.png" alt="" width="700"/>
+</p>
+
 ### Verification Infrastructure
 
 - Automated test generation with configurable parameters
-- Reference model verification against expected results
-- Support for functional and timing verification
-- Post-synthesis and post-APR simulation capabilities
+- Golden value is computed using Python's `numpy` library alongside data type libraries such as `ml_dtpyes`
+- Automated result comparisson between python's golden output and systolic array's output
+- Post-synthesis and post-APR simulation capabilities (Not supported on this public version)
 
-## Performance Metrics
+## Performance Exploration
+
+This systolic-based GEMM accelerator was used on the following projects to explore and understand the tradeoffs in PPA for different data format and memory configurations.
+
+### Project 1: An Analysis on the Effects of Variable Bit Precision and Dynamic Range on Power, Area, and Accuracy in a 65 nm GEMM Accelerator
 
 Power, Performance, and Area (PPA) analysis & comparison for all supported data formats is provided under the project report `PPA_analysis.pdf`. This report was used as a deliverable for the explorational final project for ECE 6135: Digital Systems at Nanometer Nodes.
 
